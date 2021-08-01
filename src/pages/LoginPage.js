@@ -3,7 +3,13 @@ import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Switch from "@material-ui/core/Switch";
+import Button from "@material-ui/core/Button";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import { ApiInstance } from "../api";
+import { useInput } from "../hooks/input";
+import { useSwitch } from "../hooks/switch";
+import { useAuth } from "../hooks/auth";
+import { Redirect } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -52,12 +58,29 @@ const useStyles = makeStyles((theme) => ({
 
 function LoginPage() {
     const classes = useStyles();
-    const [state, setState] = React.useState({
-        checkedRegistration: true,
-    });
-    const handleChange = (event) => {
-        setState({ ...state, [event.target.name]: event.target.checked });
+    const loginInput = useInput("");
+    const passwordInput = useInput("");
+    const typeSwitch = useSwitch(false);
+    const [isAuthorized, doAuth] = useAuth();
+
+    const doRegistration = async () => {
+        try {
+            await ApiInstance.post("/register", {
+                login: loginInput.value,
+                password: passwordInput.value,
+            });
+        } catch (error) {
+            console.log(error);
+        }
     };
+
+    const onAuthClick = async () => {
+        doAuth(loginInput.value, passwordInput.value);
+    };
+
+    if (isAuthorized) {
+        return <Redirect to="/" />;
+    }
 
     return (
         <Grid
@@ -71,24 +94,28 @@ function LoginPage() {
                     id="outlined-basic"
                     label="Login"
                     variant="outlined"
+                    {...loginInput}
                 />
                 <TextField
                     id="outlined-basic"
                     label="Password"
                     variant="outlined"
+                    {...passwordInput}
                 />
 
                 <FormControlLabel
                     control={
-                        <Switch
-                            name="checkedRegistration"
-                            onChange={handleChange}
-                            checked={state.checkedRegistration}
-                        />
+                        <Switch name="checkedRegistration" {...typeSwitch} />
                     }
                     label="Register"
                 />
             </form>
+            <Button
+                onClick={typeSwitch.checked ? doRegistration : onAuthClick}
+                variant="contained"
+            >
+                Go!
+            </Button>
         </Grid>
     );
 }

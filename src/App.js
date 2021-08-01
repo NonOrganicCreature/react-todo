@@ -6,7 +6,8 @@ import { LoginPage } from "./pages/LoginPage";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import { theme } from "./theme/dark";
-import { ApiInstance } from "./api";
+import { TodoListPage } from "./pages/TodoList";
+
 const useStyles = makeStyles((theme) => ({
     root: {
         "&": {
@@ -30,8 +31,11 @@ function CustomContainer() {
         <Container className={classes.root} maxWidth={false}>
             <Router>
                 <Switch>
-                    <Route path="/">
+                    <Route path="/login">
                         <LoginPage></LoginPage>
+                    </Route>
+                    <Route path="/">
+                        <TodoListPage></TodoListPage>
                     </Route>
                 </Switch>
             </Router>

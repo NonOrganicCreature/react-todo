@@ -11,51 +11,50 @@ const mock = new MockAdapter(ApiInstance, { delayResponse: 1000 });
 
 mock.onPost("/register").reply(function (config) {
     const data = JSON.parse(config.data);
-    const userData = localStorage.getItem("userData");
-    if (!userData) {
-        localStorage.setItem(
-            "userData",
-            JSON.stringify({
-                credentials: {
-                    login: data.login,
-                    password: data.password,
-                },
-            })
-        );
-        return [
-            200,
-            {
-                status: true,
+    localStorage.setItem(
+        "userData",
+        JSON.stringify({
+            credentials: {
+                login: data.login,
+                password: data.password,
             },
-        ];
-    }
-
-    if (userData) {
-        const newUserData = JSON.parse(userData);
-        newUserData.login = data.login;
-        newUserData.password = data.password;
-        localStorage.setItem("userData", JSON.stringify(newUserData));
-        return [
-            200,
-            {
-                status: true,
-            },
-        ];
-    }
+        })
+    );
     return [
-        403,
+        200,
         {
-            status: false,
+            status: true,
         },
     ];
 });
 
-mock.onGet("/users").reply(function (config) {
-    console.log(config);
+mock.onPost("/auth").reply(function (config) {
+    const data = JSON.parse(config.data);
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    if (userData) {
+        if (
+            userData.credentials.login === data.login &&
+            userData.credentials.password === data.password
+        ) {
+            return [
+                200,
+                {
+                    status: true,
+                },
+            ];
+        } else {
+            return [
+                400,
+                {
+                    status: false,
+                },
+            ];
+        }
+    }
     return [
-        200,
+        400,
         {
-            users: [{ id: 1, name: "John Smith" }],
+            status: false,
         },
     ];
 });
